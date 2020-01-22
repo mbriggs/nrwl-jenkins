@@ -1,9 +1,11 @@
 node {
-  withEnv(["HOME=/root"])
-    docker.image('node:latest').inside('--tmpfs /.config -u root:root') {
+  withEnv(["HOME=."])
+    docker.image('node:latest').inside('--tmpfs /.config') {
       stage("Prepare") {
+        sh 'pwd'
+        sh 'echo $HOME'
         checkout scm
-        sh 'yarn install --unsafe-permg'
+        sh 'yarn install'
       }
 
       stage("Test") {
