@@ -1,5 +1,5 @@
 node {
-  withEnv(["HOME=."])
+  withEnv(["HOME=."]) {
     docker.image('node:latest').inside('--tmpfs /.config') {
       stage("Prepare") {
         sh 'pwd'
