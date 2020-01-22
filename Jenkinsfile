@@ -1,6 +1,6 @@
 node {
   withEnv(['HOME=.']) {
-    docker.image('node:latest').inside('-u 0:0') {
+    docker.image('node:latest').inside('-u 0:0 -v cypress-cache:/.cache') {
       stage("Prepare") {
         checkout scm
         sh 'yarn install --unsafe-permg'
