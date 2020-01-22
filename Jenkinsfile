@@ -1,6 +1,6 @@
 node {
   withEnv(['HOME=.']) {
-    docker.image('node:latest').inside {
+    docker.image('node:latest').inside('-u 0:0') {
       stage("Prepare") {
         checkout scm
         sh 'yarn install --unsafe-permg'
