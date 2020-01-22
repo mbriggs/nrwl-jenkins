@@ -31,22 +31,24 @@ Most projects that don't use Nx end up building, testing, and linting every sing
 
 ```groovy
 node {
-  docker.image('node:latest').inside {
-    stage("Prepare") {
-      checkout scm
-      sh 'yarn install'
-    }
+  withEnv(["HOME=${workspace}"]) {
+    docker.image('node:latest').inside('--tmpfs /.config') {
+      stage("Prepare") {
+        checkout scm
+        sh 'yarn install'
+      }
 
-    stage("Test") {
-      sh 'yarn nx run-many --target=test --all'
-    }
+      stage("Test") {
+        sh 'yarn nx run-many --target=test --all'
+      }
 
-    stage("Lint") {
-      sh 'yarn nx run-many --target=lint --all'
-    }
+      stage("Lint") {
+        sh 'yarn nx run-many --target=lint --all'
+      }
 
-    stage("Build") {
-      sh 'yarn nx run-many --target=build --all --prod'
+      stage("Build") {
+        sh 'yarn nx run-many --target=build --all --prod'
+      }
     }
   }
 }
@@ -64,43 +66,65 @@ Nx knows what is affected by your PR, so it doesn't have to test/build/lint ever
 
 If you update `azure-pipelines.yml` to use `nx affected` instead of `nx run-many`:
 
-```yaml
-jobs:
-  - job: ci
-    timeoutInMinutes: 120
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-      - template: .azure-pipelines/steps/install-node-modules.yml
-      - script: yarn nx affected --target=test --base=origin/master
-      - script: yarn nx affected --target=lint --base=origin/master
-      - script: yarn nx affected --target=build --base=origin/master --prod
+```groovy
+node {
+  withEnv(["HOME=${workspace}"]) {
+    docker.image('node:latest').inside('--tmpfs /.config') {
+      stage("Prepare") {
+        checkout scm
+        sh 'yarn install'
+      }
+
+      stage("Test") {
+        sh 'yarn nx affected --target=test --base=origin/master'
+      }
+
+      stage("Lint") {
+        sh 'yarn nx affected --target=lint --base=origin/master'
+      }
+
+      stage("Build") {
+        sh 'yarn nx affected --target=build --base=origin/master --prod'
+      }
+    }
+  }
+}
 ```
 
 the CI time will go down from 45 minutes to 8 minutes.
 
-This is a good result. It helps to lower the average CI time, but doesn't help with the worstcase scenario. Some PR are going to affect a large portion of the repo.
+This is a good result. It helps to lower the average CI time, but doesn't help with the worst case scenario. Some PR are going to affect a large portion of the repo.
 
 <p align="center"><img src="https://raw.githubusercontent.com/nrwl/nx-azure-build/master/readme-assets/graph-everything-affected.png" width="800"></p>
 
 You could make it faster by running the commands in parallel:
 
-```yaml
-jobs:
-  - job: ci
-    timeoutInMinutes: 120
-    pool:
-      vmImage: 'ubuntu-latest'
-    variables:
-      IS_PR: $[ eq(variables['Build.Reason'], 'PullRequest') ]
-    steps:
-      - template: .azure-pipelines/steps/install-node-modules.yml
-      - script: yarn nx affected --target=test --base=origin/master --parallel
-      - script: yarn nx affected --target=lint --base=origin/master --parallel
-      - script: yarn nx affected --target=build --base=origin/master --prod --parallel
+```groovy
+node {
+  withEnv(["HOME=${workspace}"]) {
+    docker.image('node:latest').inside('--tmpfs /.config') {
+      stage("Prepare") {
+        checkout scm
+        sh 'yarn install'
+      }
+
+      stage("Test") {
+        sh 'yarn nx affected --target=test --base=origin/master --parallel'
+      }
+
+      stage("Lint") {
+        sh 'yarn nx affected --target=lint --base=origin/master --parallel'
+      }
+
+      stage("Build") {
+        sh 'yarn nx affected --target=build --base=origin/master --prod --parallel'
+      }
+    }
+  }
+}
 ```
 
-This helps but it still has a ceiling. At some point, this won't be enough. A single agent is simply insufficent. You need to distrubte CI across a grid of machines.
+This helps but it still has a ceiling. At some point, this won't be enough. A single agent is simply insufficent. You need to distribute CI across a grid of machines.
 
 ## Distributed CI
 
@@ -120,6 +144,10 @@ initial_setup - lint2
 ### Initial Setup
 
 The `initial_setup` job figures out what is affected and what needs to run on what agent.
+
+```groovy
+
+```
 
 ```yaml
 jobs:

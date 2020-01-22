@@ -1,24 +1,40 @@
-node {
+node('master') {
   withEnv(["HOME=${workspace}"]) {
     docker.image('node:latest').inside('--tmpfs /.config') {
       stage("Prepare") {
-        sh 'pwd'
-        sh 'echo $HOME'
         checkout scm
         sh 'yarn install'
       }
 
-      stage("Test") {
-        sh 'yarn nx run-many --target=test --all'
-      }
+      distributed('test', 3)
+      distributed('lint', 3)
+      distributed('build', 3)
 
-      stage("Lint") {
-        sh 'yarn nx run-many --target=lint --all'
-      }
+    }
+  }
+}
 
-      stage("Build") {
-        sh 'yarn nx run-many --target=build --all --prod'
+def distributed(String target, int bins) {
+  def jobs = splitJobs(target, bins)
+
+  (1..bins).each {
+    stage("${target} - ${it}") {
+      node {
+        def list = jobs[it - 1].join(',')
+        sh "npx nx run-many --target=${target} --projects=${list} --parallel"
       }
     }
   }
+}
+
+def splitJobs(String target, int bins) {
+  def String baseSha = env.CHANGE_ID ? 'origin/master' : 'origin/master~1'
+  def raw = sh("npx nx print-affected --base=${baseSha} --target=${target}", returnStdout: true)
+  def data = readJSON(text: raw)
+  def tasks = data['tasks'].collect { it['target']['project'] }
+
+  Collections.shuffle(tasks)
+  def split = tasks.collate(bins)
+
+  return split
 }
