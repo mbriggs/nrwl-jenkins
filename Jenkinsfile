@@ -1,6 +1,6 @@
 node {
   withEnv(["HOME=${workspace}"]) {
-    docker.image('node:latest').inside('--tmpfs /.config') {
+    docker.image('node:latest').inside('--tmpfs /.config -u root:root') {
       stage("Prepare") {
         sh 'pwd'
         sh 'echo $HOME'
