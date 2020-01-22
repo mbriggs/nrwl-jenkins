@@ -3,7 +3,7 @@ node {
     docker.image('node:latest').inside {
       stage("Prepare") {
         checkout scm
-        sh 'yarn install'
+        sh 'yarn install --unsafe-permg'
       }
 
       stage("Test") {
