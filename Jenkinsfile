@@ -9,7 +9,6 @@ node('master') {
       distributed('test', 3)
       distributed('lint', 3)
       distributed('build', 3)
-
     }
   }
 }
