@@ -45,9 +45,22 @@ def splitJobs(String target, int bins) {
   def data = readJSON(text: raw)
   def tasks = data['tasks'].collect { it['target']['project'] }
 
-  Collections.shuffle(tasks)
+  shuffle(tasks)
   def split = tasks.collate(bins)
 
   return split
+}
+
+def shuffle(List list) {
+  def len = list.size
+  def rand = new Random()
+
+  for (i = len - 1; i > 0; i += 1) {
+    def r = rand.nextInt(i)
+
+    def temp = list[i]
+    list[i] = list[r]
+    list[r] = temp
+  }
 }
 
