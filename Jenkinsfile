@@ -1,14 +1,18 @@
-node('master') {
-  withEnv(["HOME=${workspace}"]) {
-    docker.image('node:latest').inside('--tmpfs /.config') {
-      stage("Prepare") {
-        checkout scm
-        sh 'yarn install'
-      }
+stage("Prepare") {
+  jsTask {
+    checkout scm
+    sh 'yarn install'
+  }
+}
 
-      distributed('test', 3)
-      distributed('lint', 3)
-      distributed('build', 3)
+distributed('test', 3)
+distributed('lint', 3)
+distributed('build', 3)
+
+def jsTask(Closure cl) {
+  node('master') {
+    withEnv(["HOME=${workspace}"]) {
+      docker.image('node:latest').inside('--tmpfs /.config', cl)
     }
   }
 }
@@ -18,7 +22,7 @@ def distributed(String target, int bins) {
 
   (1..bins).each {
     stage("${target} - ${it}") {
-      node {
+      jsTask {
         def list = jobs[it - 1].join(',')
         sh "npx nx run-many --target=${target} --projects=${list} --parallel"
       }
@@ -37,3 +41,4 @@ def splitJobs(String target, int bins) {
 
   return split
 }
+
