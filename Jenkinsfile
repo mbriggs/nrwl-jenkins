@@ -5,9 +5,12 @@ stage("Prepare") {
   }
 }
 
-distributed('test', 3)
-distributed('lint', 3)
-distributed('build', 3)
+def distributedTasks = [:]
+distributedTasks += distributed('test', 3)
+distributedTasks += distributed('lint', 3)
+distributedTasks += distributed('build', 3)
+
+parallel distributedTasks
 
 def jsTask(Closure cl) {
   node('master') {
@@ -19,20 +22,25 @@ def jsTask(Closure cl) {
 
 def distributed(String target, int bins) {
   def jobs = splitJobs(target, bins)
+  def tasks = [:]
 
-  (1..bins).each {
-    stage("${target} - ${it}") {
-      jsTask {
-        def list = jobs[it - 1].join(',')
-        sh "npx nx run-many --target=${target} --projects=${list} --parallel"
+  (1..bins).each { int bin ->
+    tasks["${target} - ${bin}"] = {
+      stage("${target} - ${bin}") {
+        jsTask {
+          def list = jobs[bin - 1].join(',')
+          sh "npx nx run-many --target=${target} --projects=${list} --parallel"
+        }
       }
     }
   }
+
+  return tasks
 }
 
 def splitJobs(String target, int bins) {
   def String baseSha = env.CHANGE_ID ? 'origin/master' : 'origin/master~1'
-  def raw = sh("npx nx print-affected --base=${baseSha} --target=${target}", returnStdout: true)
+  def raw = sh(script: "npx nx print-affected --base=${baseSha} --target=${target}", returnStdout: true)
   def data = readJSON(text: raw)
   def tasks = data['tasks'].collect { it['target']['project'] }
 
