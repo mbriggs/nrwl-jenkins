@@ -13,7 +13,7 @@ distributedTasks += distributed('build', 3)
 parallel distributedTasks
 
 def jsTask(Closure cl) {
-  node('master') {
+  node {
     withEnv(["HOME=${workspace}"]) {
       docker.image('node:latest').inside('--tmpfs /.config', cl)
     }
@@ -22,12 +22,14 @@ def jsTask(Closure cl) {
 
 def distributed(String target, int bins) {
   def jobs = splitJobs(target, bins)
+
   def tasks = [:]
 
   (1..bins).each { int bin ->
     tasks["${target} - ${bin}"] = {
       stage("${target} - ${bin}") {
         jsTask {
+          echo jobs
           def list = jobs[bin - 1].join(',')
           sh "npx nx run-many --target=${target} --projects=${list} --parallel"
         }
