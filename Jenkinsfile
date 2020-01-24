@@ -36,8 +36,9 @@ def distributed(String target, int bins) {
     def title = "${target} - ${i}"
 
     tasks[title] = {
-      jsTask {
-        step(title) {
+      stage(title) {
+
+        jsTask {
           sh "npx nx run-many --target=${target} --projects=${list} --parallel"
         }
       }
