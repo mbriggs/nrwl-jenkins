@@ -45,7 +45,7 @@ def distributed(String target, int bins) {
   }
 
   jsTask { echo "ugh" }
-  jsTask { echo tasks.size() }
+  jsTask { echo jobs.size() }
 
   return tasks
 }
