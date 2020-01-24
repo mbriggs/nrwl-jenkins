@@ -28,10 +28,8 @@ def distributed(String target, int bins) {
 
   def tasks = [:]
 
-  for(i = 0; i < jobs.size; i++) {
+  jobs.eachWithIndex { jobRun, i ->
     jsTask { echo 'loop' }
-    def jobRun = jobs[i];
-    jsTask { echo 'run' }
 
     def list = jobRun.join(',')
 
