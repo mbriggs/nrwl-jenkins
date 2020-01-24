@@ -33,10 +33,13 @@ def distributed(String target, int bins) {
     jsTask { echo 'loop' }
 
     def list = jobRun.join(',')
+    def title = "${target} - ${i}"
 
-    tasks["${target} - ${i}"] = {
+    tasks[title] = {
       jsTask {
-        sh "npx nx run-many --target=${target} --projects=${list} --parallel"
+        step(title) {
+          sh "npx nx run-many --target=${target} --projects=${list} --parallel"
+        }
       }
     }
   }
