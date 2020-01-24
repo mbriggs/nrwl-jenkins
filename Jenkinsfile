@@ -57,9 +57,5 @@ def splitJobs(String target, int bins) {
 
   def split = tasks.collate(bins)
 
-  jsTask { echo "split" }
-  jsTask { echo data }
-
-
   return split
 }
