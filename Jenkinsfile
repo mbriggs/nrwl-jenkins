@@ -25,12 +25,13 @@ def distributed(String target, int bins) {
 
   def tasks = [:]
 
-  (1..bins).each { int bin ->
-    tasks["${target} - ${bin}"] = {
-      stage("${target} - ${bin}") {
+  for(i = 0; i < jobs.size; i++) {
+    def jobRun = jobs[i];
+
+    tasks["${target} - ${i}"] ={
+      stage("${target} - ${i}") {
         jsTask {
-          echo jobs
-          def list = jobs[bin - 1].join(',')
+          def list = jobRun.join(',')
           sh "npx nx run-many --target=${target} --projects=${list} --parallel"
         }
       }
