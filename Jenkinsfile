@@ -44,7 +44,7 @@ def distributed(String target, int bins) {
   }
 
   jsTask { echo "BEFORE" }
-  jsTask { echo task.inspect }
+  jsTask { echo tasks.inspect }
   jsTask { echo "AFTER" }
 
   return tasks
