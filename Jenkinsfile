@@ -45,7 +45,10 @@ def splitJobs(String target, int bins) {
   def String raw
   jsTask { raw = sh(script: "npx nx print-affected --base=${baseSha} --target=${target}", returnStdout: true) }
   def data = readJSON(text: raw)
+  jsTask { echo raw }
+  jsTask { echo data }
   def tasks = data['tasks'].collect { it['target']['project'] }
+  jsTask { echo tasks }
 
   shuffle(tasks)
   def split = tasks.collate(bins)
