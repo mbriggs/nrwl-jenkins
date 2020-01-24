@@ -21,15 +21,22 @@ def jsTask(Closure cl) {
 }
 
 def distributed(String target, int bins) {
+  jsTask { echo 'distributed' }
+
+
   def jobs = splitJobs(target, bins)
 
   def tasks = [:]
 
   for(i = 0; i < jobs.size; i++) {
+    jsTask { echo 'loop' }
     def jobRun = jobs[i];
+    jsTask { echo 'run' }
+
     def list = jobRun.join(',')
 
     jsTask { echo list }
+    jsTask { echo 'here' }
 
     tasks["${target} - ${i}"] ={
       stage("${target} - ${i}") {
@@ -48,9 +55,13 @@ def splitJobs(String target, int bins) {
   def String raw
   jsTask { raw = sh(script: "npx nx print-affected --base=${baseSha} --target=${target}", returnStdout: true) }
   def data = readJSON(text: raw)
+  jsTask { echo 'json' }
+
   def tasks = data['tasks'].collect { it['target']['project'] }
+  jsTask { echo 'tasks' }
 
   def split = tasks.collate(bins)
 
+  jsTask { echo 'collated' }
   return split
 }
