@@ -11,8 +11,8 @@ stage("Building Distributed Tasks") {
   distributedTasks << distributed('test', 3)
   distributedTasks << distributed('lint', 3)
   distributedTasks << distributed('build', 3)
+  jsTask { echo distributedTasks.inspect }
 }
-
 parallel distributedTasks
 
 def jsTask(Closure cl) {
