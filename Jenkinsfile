@@ -8,9 +8,9 @@ stage("Prepare") {
 def distributedTasks = [:]
 
 stage("Building Distributed Tasks") {
-  distributedTasks = distributedTasks + distributed('test', 3)
-  distributedTasks += distributed('lint', 3)
-  distributedTasks += distributed('build', 3)
+  distributedTasks << distributed('test', 3)
+  distributedTasks << distributed('lint', 3)
+  distributedTasks << distributed('build', 3)
 }
 
 parallel distributedTasks
