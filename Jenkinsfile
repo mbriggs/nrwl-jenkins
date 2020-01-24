@@ -14,6 +14,8 @@ stage("Building Distributed Tasks") {
 }
 
 stage("Run Distributed Tasks") {
+  jsTask { echo "ugh" }
+  jsTask { echo distributedTasks.size() }
   parallel distributedTasks
 }
 
