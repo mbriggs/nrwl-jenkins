@@ -6,9 +6,12 @@ stage("Prepare") {
 }
 
 def distributedTasks = [:]
-distributedTasks += distributed('test', 3)
-distributedTasks += distributed('lint', 3)
-distributedTasks += distributed('build', 3)
+
+stage("Building Distributed Tasks") {
+  distributedTasks = distributedTasks + distributed('test', 3)
+  distributedTasks += distributed('lint', 3)
+  distributedTasks += distributed('build', 3)
+}
 
 parallel distributedTasks
 
@@ -21,20 +24,13 @@ def jsTask(Closure cl) {
 }
 
 def distributed(String target, int bins) {
-  jsTask { echo 'distributed' }
-
-
   def jobs = splitJobs(target, bins)
-
   def tasks = [:]
 
   jobs.eachWithIndex { jobRun, i ->
     jsTask { echo 'loop' }
 
     def list = jobRun.join(',')
-
-    jsTask { echo list }
-    jsTask { echo 'here' }
 
     tasks["${target} - ${i}"] ={
       stage("${target} - ${i}") {
@@ -43,7 +39,7 @@ def distributed(String target, int bins) {
         }
       }
     }
-  }
+  }.
 
   return tasks
 }
@@ -53,13 +49,10 @@ def splitJobs(String target, int bins) {
   def String raw
   jsTask { raw = sh(script: "npx nx print-affected --base=${baseSha} --target=${target}", returnStdout: true) }
   def data = readJSON(text: raw)
-  jsTask { echo 'json' }
 
   def tasks = data['tasks'].collect { it['target']['project'] }
-  jsTask { echo 'tasks' }
 
   def split = tasks.collate(bins)
 
-  jsTask { echo 'collated' }
   return split
 }
