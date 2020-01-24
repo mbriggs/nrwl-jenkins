@@ -44,9 +44,6 @@ def distributed(String target, int bins) {
     }
   }
 
-  jsTask { echo "ugh" }
-  jsTask { echo jobs.size() }
-
   return tasks
 }
 
@@ -59,6 +56,10 @@ def splitJobs(String target, int bins) {
   def tasks = data['tasks'].collect { it['target']['project'] }
 
   def split = tasks.collate(bins)
+
+  jsTask { echo "split" }
+  jsTask { echo split }
+
 
   return split
 }
