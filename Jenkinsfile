@@ -39,7 +39,7 @@ def distributed(String target, int bins) {
         }
       }
     }
-  }.
+  }
 
   return tasks
 }
