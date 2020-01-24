@@ -12,7 +12,10 @@ stage("Building Distributed Tasks") {
   distributedTasks << distributed('lint', 3)
   distributedTasks << distributed('build', 3)
 }
-parallel distributedTasks
+
+stage("Run Distributed Tasks") {
+  parallel distributedTasks
+}
 
 def jsTask(Closure cl) {
   node {
