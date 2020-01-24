@@ -11,7 +11,9 @@ stage("Building Distributed Tasks") {
   distributedTasks << distributed('test', 3)
   distributedTasks << distributed('lint', 3)
   distributedTasks << distributed('build', 3)
+  jsTask { echo "BEFORE" }
   jsTask { echo distributedTasks.inspect }
+  jsTask { echo "AFTER" }
 }
 parallel distributedTasks
 
