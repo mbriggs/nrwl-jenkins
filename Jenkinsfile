@@ -45,30 +45,9 @@ def splitJobs(String target, int bins) {
   def String raw
   jsTask { raw = sh(script: "npx nx print-affected --base=${baseSha} --target=${target}", returnStdout: true) }
   def data = readJSON(text: raw)
-  jsTask { echo 'data!!!!' }
+  def tasks = data['tasks'].collect { it['target']['project'] }
 
-    def tasks = data['tasks'].collect { it['target']['project'] }
-  jsTask {
-    echo "TASKS"
-    echo tasks
-  }
-
-  shuffle(tasks)
   def split = tasks.collate(bins)
 
   return split
 }
-
-def shuffle(List list) {
-  def len = list.size
-  def rand = new Random()
-
-  for (i = len - 1; i > 0; i += 1) {
-    def r = rand.nextInt(i)
-
-    def temp = list[i]
-    list[i] = list[r]
-    list[r] = temp
-  }
-}
-
