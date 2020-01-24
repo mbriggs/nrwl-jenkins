@@ -12,7 +12,7 @@ stage("Building Distributed Tasks") {
   distributedTasks << distributed('lint', 3)
   distributedTasks << distributed('build', 3)
   jsTask { echo "BEFORE" }
-  jsTask { echo distributedTasks.inspect }
+  jsTask { echo distributedTasks.inspect() }
   jsTask { echo "AFTER" }
 }
 parallel distributedTasks
@@ -44,7 +44,7 @@ def distributed(String target, int bins) {
   }
 
   jsTask { echo "BEFORE" }
-  jsTask { echo tasks.inspect }
+  jsTask { echo tasks.inspect() }
   jsTask { echo "AFTER" }
 
   return tasks
