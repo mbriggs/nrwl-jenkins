@@ -11,9 +11,6 @@ stage("Building Distributed Tasks") {
   distributedTasks << distributed('test', 3)
   distributedTasks << distributed('lint', 3)
   distributedTasks << distributed('build', 3)
-  jsTask { echo "BEFORE" }
-  jsTask { echo distributedTasks.inspect() }
-  jsTask { echo "AFTER" }
 }
 parallel distributedTasks
 
@@ -34,18 +31,12 @@ def distributed(String target, int bins) {
 
     def list = jobRun.join(',')
 
-    tasks["${target} - ${i}"] ={
-      stage("${target} - ${i}") {
-        jsTask {
-          sh "npx nx run-many --target=${target} --projects=${list} --parallel"
-        }
+    tasks["${target} - ${i}"] = {
+      jsTask {
+        sh "npx nx run-many --target=${target} --projects=${list} --parallel"
       }
     }
   }
-
-  jsTask { echo "BEFORE" }
-  jsTask { echo tasks.inspect() }
-  jsTask { echo "AFTER" }
 
   return tasks
 }
