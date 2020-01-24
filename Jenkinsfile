@@ -14,8 +14,6 @@ stage("Building Distributed Tasks") {
 }
 
 stage("Run Distributed Tasks") {
-  jsTask { echo "ugh" }
-  jsTask { echo distributedTasks.size() }
   parallel distributedTasks
 }
 
@@ -45,6 +43,9 @@ def distributed(String target, int bins) {
       }
     }
   }
+
+  jsTask { echo "ugh" }
+  jsTask { echo tasks.size() }
 
   return tasks
 }
